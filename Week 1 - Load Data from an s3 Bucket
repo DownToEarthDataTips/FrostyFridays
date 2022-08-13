@@ -1,0 +1,19 @@
+create or replace file format format_frosty_1
+type = "CSV"
+field_delimiter = "|"
+skip_header = 1;
+
+create or replace stage csv_stage_frosty_1
+file_format = format_frosty_1
+url = "s3://frostyfridaychallenges/challenge_1/";
+
+select metadata$filename, metadata$file_row_number, $1, $2, $3 from @csv_stage_frosty_1;
+
+create or replace table table_frosty_1
+(column1 varchar
+);
+
+copy into table_frosty_1
+from @csv_stage_frosty_1;
+
+select * from table_frosty_1;
