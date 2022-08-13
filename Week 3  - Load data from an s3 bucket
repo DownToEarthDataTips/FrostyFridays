@@ -1,0 +1,73 @@
+//Creating File Format
+
+   create or replace file format Basic_csv
+  type = 'CSV'
+  field_delimiter = '|'
+  skip_header = 1; 
+  
+  
+//Creating Stage with url provided in the exercise 
+create or replace stage week3_Frosty
+    file_format = Basic_csv
+    url ='s3://frostyfridaychallenges/challenge_3/';
+    
+ 
+//Querying Metadata (grouping by file name) to see all file names.
+select metadata$filename
+    from @week3_Frosty
+    group by metadata$filename
+    order by 1;  
+
+//Query keywords file to see what's inside the cells
+select metadata$filename, $1
+    from @week3_Frosty
+    where metadata$filename = 'challenge_3/keywords.csv';
+
+ 
+//Creating table for keywords.csv file
+create or replace table keywords
+(column1 varchar
+);
+
+//Filling table with keywords.csv file rows
+copy into  keywords
+from @week3_Frosty
+FILES =('keywords.csv'); 
+
+
+//SELECT SPLIT_PART(col1, ',', 1) as firstValue, SPLIT_PART(col1, ',', -1) as lastValue FROM   (SELECT 'aaa,bbb,ccc,ddd,eee' AS col1);
+SELECT SPLIT_PART(column1, ',', 1) as key 
+from keywords;
+
+//Alter keywords table to add the key column
+ALTER TABLE KEYWORDS
+add column keys varchar as ( SPLIT_PART(column1, ',', 1) );
+
+select * from keywords;
+
+//Creating table for filenames 
+create or replace table important
+ (FILENAME varchar,
+  FILE_ROW_NUMBER int) 
+;
+
+//Pulling METADATA into Table
+copy into important
+from 
+(SELECT METADATA$FILENAME,
+        METADATA$FILE_ROW_NUMBER       
+ FROM @week3_Frosty
+);
+ 
+select  FILENAME, count(FILE_ROW_NUMBER)
+from important
+group by filename;
+ 
+//Query only filenames that contain keywords
+ select FILENAME, count(FILE_ROW_NUMBER) as NUMBER_OF_ROWS
+from important i
+join keywords k 
+on contains(i.filename, k.keys)
+
+group by filename
+order by filename;
