@@ -1,0 +1,48 @@
+create or replace table hero_powers (
+hero_name VARCHAR(50),
+flight VARCHAR(50),
+laser_eyes VARCHAR(50),
+invisibility VARCHAR(50),
+invincibility VARCHAR(50),
+psychic VARCHAR(50),
+magic VARCHAR(50),
+super_speed VARCHAR(50),
+super_strength VARCHAR(50)
+);
+
+insert into hero_powers (hero_name, flight, laser_eyes, invisibility, invincibility, psychic, magic, super_speed, super_strength) values ('The Impossible Guard', '++', '-', '-', '-', '-', '-', '-', '+');
+insert into hero_powers (hero_name, flight, laser_eyes, invisibility, invincibility, psychic, magic, super_speed, super_strength) values ('The Clever Daggers', '-', '+', '-', '-', '-', '-', '-', '++');
+insert into hero_powers (hero_name, flight, laser_eyes, invisibility, invincibility, psychic, magic, super_speed, super_strength) values ('The Quick Jackal', '+', '-', '++', '-', '-', '-', '-', '-');
+insert into hero_powers (hero_name, flight, laser_eyes, invisibility, invincibility, psychic, magic, super_speed, super_strength) values ('The Steel Spy', '-', '++', '-', '-', '+', '-', '-', '-');
+insert into hero_powers (hero_name, flight, laser_eyes, invisibility, invincibility, psychic, magic, super_speed, super_strength) values ('Agent Thundering Sage', '++', '+', '-', '-', '-', '-', '-', '-');
+insert into hero_powers (hero_name, flight, laser_eyes, invisibility, invincibility, psychic, magic, super_speed, super_strength) values ('Mister Unarmed Genius', '-', '-', '-', '-', '-', '-', '-', '-');
+insert into hero_powers (hero_name, flight, laser_eyes, invisibility, invincibility, psychic, magic, super_speed, super_strength) values ('Doctor Galactic Spectacle', '-', '-', '-', '++', '-', '-', '-', '+');
+insert into hero_powers (hero_name, flight, laser_eyes, invisibility, invincibility, psychic, magic, super_speed, super_strength) values ('Master Rapid Illusionist', '-', '-', '-', '-', '++', '-', '+', '-');
+insert into hero_powers (hero_name, flight, laser_eyes, invisibility, invincibility, psychic, magic, super_speed, super_strength) values ('Galactic Gargoyle', '+', '-', '-', '-', '-', '-', '++', '-');
+insert into hero_powers (hero_name, flight, laser_eyes, invisibility, invincibility, psychic, magic, super_speed, super_strength) values ('Alley Cat', '-', '++', '-', '-', '-', '-', '-', '+');
+
+select * from hero_powers;
+
+--As you can see , every hero has 2 powers, noted as ‘++’ for the main power and + for a secondary power.
+
+select hero_name
+    ,  case when flight = '++' THEN  'FLIGHT' 
+            when laser_eyes = '++' then  'LASER_EYES' 
+            when INVISIBILITY = '++' then  'INVISIBILITY'  
+            when INVINCIBILITY = '++' then  'INVINCIBILITY' 
+            when PSYCHIC = '++' then  'PSYCHIC' 
+            when MAGIC = '++' then  'MAGIC' 
+            when SUPER_SPEED = '++' then  'SUPER_SPEED' 
+            when SUPER_STRENGTH = '++' then  'SUPER_STRENGTH' 
+            END as MAIN_POWER
+    , case when flight = '+' THEN  'FLIGHT' 
+            when laser_eyes = '+' then  'LASER_EYES' 
+            when INVISIBILITY = '+' then  'INVISIBILITY'  
+            when INVINCIBILITY = '+' then  'INVINCIBILITY' 
+            when PSYCHIC = '+' then  'PSYCHIC' 
+            when MAGIC = '+' then  'MAGIC' 
+            when SUPER_SPEED = '+' then  'SUPER_SPEED' 
+            when SUPER_STRENGTH = '+' then  'SUPER_STRENGTH' 
+            END as SECONDARY_POWER
+from hero_powers
+where main_power IS NOT null;
