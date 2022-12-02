@@ -1,0 +1,49 @@
+--a. Landing zone (external stage, raw table - weather_raw)
+CREATE SCHEMA GAIA_DB.LANDING_ZONE; 
+USE SCHEMA GAIA_DB.LANDING_ZONE; 
+
+CREATE OR REPLACE FILE FORMAT ff_json
+type = 'json';
+
+CREATE OR REPLACE STAGE landing_stage
+file_format = ff_json
+url = 's3://frostyfridaychallenges/challenge_25'; 
+
+list @landing_stage;
+
+create or replace TABLE weather_raw (json_data VARIANT)
+    as (select * from @landing_stage);
+
+select * from weather_raw;
+
+--b. Curated zone (raw data parsed table - weather_parsed)
+CREATE OR REPLACE SCHEMA GAIA_DB.CURATED_ZONE; 
+USE SCHEMA GAIA_DB.CURATED_ZONE; 
+
+
+create or replace TABLE weather_parsed as (
+    SELECT a1.value:timestamp::DATETIME as timestamp_var,
+        a1.value:temperature::FLOAT as temperature,
+        a1.value:precipitation::FLOAT as precipitation,
+        a1.value:wind_speed::FLOAT as wind_speed,
+        a1.value:relative_humidity::NUMBER as relative_humidity,
+        a1.value:icon::VARCHAR as icon
+    FROM GAIA_DB.LANDING_ZONE.weather_raw a,
+        LATERAL FLATTEN(input => a.$1:weather) 
+ a1);
+ 
+ select * from weather_parsed;
+
+--c. Consumption zone (aggregated data table - weather_agg)
+CREATE OR REPLACE SCHEMA GAIA_DB.CONSUMPTION_ZONE; 
+USE SCHEMA GAIA_DB.CONSUMPTION_ZONE;
+
+select date_trunc('day', timestamp_var) AS date
+, array_agg(DISTINCT icon) icon_array
+, avg(temperature) avg_temperature
+, sum(precipitation) total_precipitation
+, avg(wind_speed) avg_wind
+, avg(relative_humidity) avg_humidity
+from GAIA_DB.CURATED_ZONE.weather_parsed
+group by 1
+order by 1 desc;
